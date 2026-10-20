@@ -3,30 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style src="style.css"></style>
+    <title>Student Registration Portal | Demo Project</title>
+    <!-- Correctly linked external stylesheet (Replaced invalid <style src="style.css">) -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div style="background-color: #1e2640; color: #dc9750; text-align: justify; "><form action="" method="post" >
-        Name:-
-        <input type="text" name="name" placeholder="Enter your name"><br>
-        Gender:- 
-        <input type="radio" name="gender" value="male"> Male
-        <input type="radio" name="gender" value="Female"> Female <br>
-        Course:-
-        <select name="course" id="">
-            <option value="">Select Course</option>
-            <option value="BCA">BCA</option>
-            <option value="MCA">MCA</option>
-            <option value="BBA">BBA</option>
-            <option value="MBA">MBA</option>
-        </select><br>
 
-        Address:- <br>
-        <textarea name="address" id="" cols="30" rows="10" placeholder="Enter your address"></textarea><br>
+    <!-- Main Application Wrapper -->
+    <div class="app-layout">
         
-        <button type="submit">Submit</button>
-        <button type="reset">Clear</button>
-    </form></div>
+        <!-- Top Navigation / Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <span class="logo-icon">🎓</span>
+                    <div>
+                        <h1>Student Portal</h1>
+                        <p class="subtitle">Course Enrollment & Record Management System</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <span class="stat-label">Total Registered</span>
+                        <span class="stat-value" id="totalCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid: Form on Left, Table on Right -->
+        <main class="main-container">
+            
+            <!-- SECTION 1: Student Registration Form Card -->
+            <section class="card form-card">
+                <div class="card-header">
+                    <h2 id="formHeading">New Registration</h2>
+                    <span class="badge" id="formModeBadge">Create Mode</span>
+                </div>
+
+                <!-- Notification/Alert Area for Form Messages -->
+                <div id="formAlert" class="alert d-none" role="alert"></div>
+
+                <!-- Form: Preserves all original input names and controls, enhanced with semantic labels and IDs -->
+                <form id="studentForm" novalidate>
+                    <!-- Hidden field to track if we are Editing an existing student -->
+                    <input type="hidden" id="editStudentId" value="">
+
+                    <!-- 1. Full Name Input -->
+                    <div class="form-group">
+                        <label for="studentName" class="form-label">
+                            Full Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="studentName" 
+                            name="name" 
+                            class="form-control" 
+                            placeholder="Enter your name (e.g., Aryan Sharma)" 
+                            required
+                        >
+                        <small class="error-text" id="nameError"></small>
+                    </div>
+
+                    <!-- 2. Gender Radio Group -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Gender <span class="required">*</span>
+                        </label>
+                        <div class="radio-group" id="genderRadioGroup">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male" id="genderMale">
+                                <span>Male</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="Female" id="genderFemale">
+                                <span>Female</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="Other" id="genderOther">
+                                <span>Other</span>
+                            </label>
+                        </div>
+                        <small class="error-text" id="genderError"></small>
+                    </div>
+
+                    <!-- 3. Course Selection Dropdown -->
+                    <div class="form-group">
+                        <label for="studentCourse" class="form-label">
+                            Course <span class="required">*</span>
+                        </label>
+                        <select name="course" id="studentCourse" class="form-control" required>
+                            <option value="">Select Course</option>
+                            <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                            <option value="MCA">MCA (Master of Computer Applications)</option>
+                            <option value="BBA">BBA (Bachelor of Business Admin)</option>
+                            <option value="MBA">MBA (Master of Business Admin)</option>
+                        </select>
+                        <small class="error-text" id="courseError"></small>
+                    </div>
+
+                    <!-- 4. Address Textarea -->
+                    <div class="form-group">
+                        <label for="studentAddress" class="form-label">
+                            Address <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            name="address" 
+                            id="studentAddress" 
+                            class="form-control" 
+                            rows="4" 
+                            placeholder="Enter your permanent or residential address"
+                            required
+                        ></textarea>
+                        <small class="error-text" id="addressError"></small>
+                    </div>
+
+                    <!-- Form Buttons -->
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            <span class="btn-icon">💾</span> <span id="submitBtnText">Submit</span>
+                        </button>
+                        <button type="button" id="cancelEditBtn" class="btn btn-secondary d-none">
+                            Cancel
+                        </button>
+                        <button type="reset" id="resetBtn" class="btn btn-outline">
+                            Clear
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECTION 2: Student Records Display & Management Card -->
+            <section class="card records-card">
+                <div class="card-header records-header">
+                    <div>
+                        <h2>Registered Students</h2>
+                        <p class="section-desc">Manage, search, and export enrolled student data</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="exportCsvBtn" class="btn btn-sm btn-outline" title="Download records as CSV">
+                            📥 Export CSV
+                        </button>
+                        <button id="exportJsonBtn" class="btn btn-sm btn-outline" title="Download records as JSON">
+                            📄 Export JSON
+                        </button>
+                        <button id="demoDataBtn" class="btn btn-sm btn-secondary" title="Populate with sample students">
+                            ✨ Demo Data
+                        </button>
+                        <button id="clearAllBtn" class="btn btn-sm btn-danger-outline" title="Delete all records">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search & Filter Controls -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by name or address..." 
+                            class="form-control"
+                        >
+                    </div>
+                    <div class="filter-box">
+                        <select id="courseFilter" class="form-control">
+                            <option value="ALL">All Courses</option>
+                            <option value="BCA">BCA</option>
+                            <option value="MCA">MCA</option>
+                            <option value="BBA">BBA</option>
+                            <option value="MBA">MBA</option>
+                        </select>
+                    </div>
+                    <div class="sort-box">
+                        <select id="sortBy" class="form-control">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="nameAsc">Name (A - Z)</option>
+                            <option value="nameDesc">Name (Z - A)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table Container with Horizontal Scroll for Small Screens -->
+                <div class="table-responsive">
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Course</th>
+                                <th>Address</th>
+                                <th>Enrolled Date</th>
+                                <th style="text-align: center; width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Rows dynamically populated by script.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State Message (Visible when no students match) -->
+                <div id="emptyState" class="empty-state d-none">
+                    <div class="empty-icon">📋</div>
+                    <h3>No Student Records Found</h3>
+                    <p id="emptyStateMessage">You haven't added any students yet. Fill out the form or click "Demo Data" to get started!</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Student Registration Demo &bull; Built with HTML, CSS & Vanilla JavaScript &bull; Data saved in Browser LocalStorage</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Container for Quick Alerts -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Confirmation Modal Dialog for Destructive Actions -->
+    <div id="confirmModal" class="modal-overlay d-none">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalCancelBtn" class="btn btn-secondary">Cancel</button>
+                <button id="modalConfirmBtn" class="btn btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correctly linked external JavaScript file with defer attribute -->
+    <script src="script.js" defer></script>
 </body>
 </html>
